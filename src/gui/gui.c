@@ -281,7 +281,13 @@ int dt_gui_init()
     fclose(f);
     buf[sz] = 0;
     dt_log(s_log_gui, "loading additional gamepad maps from gamecontrollerdb");
-    glfwUpdateGamepadMappings(buf);
+
+    printf("---- BEGIN BUF ----\n");
+printf("%s\n", buf);
+printf("---- END BUF ----\n");
+    
+    int count = glfwUpdateGamepadMappings(buf);
+    dt_log(s_log_gui, "mappings added: %d", count);
     free(buf);
   }
   vkdt.wstate.have_joystick = 0;
