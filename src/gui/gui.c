@@ -287,6 +287,21 @@ int dt_gui_init()
   vkdt.wstate.have_joystick = 0;
   for(int js=GLFW_JOYSTICK_1;!vkdt.wstate.have_joystick&&js<GLFW_JOYSTICK_LAST;js++)
   {
+
+            if (glfwJoystickPresent(js))
+        {
+            const char* name = glfwGetJoystickName(js);
+            const char* guid = glfwGetJoystickGUID(js);
+            int is_gamepad = glfwJoystickIsGamepad(js);
+
+            printf("Joystick %d:\n", js);
+            printf("  Name: %s\n", name ? name : "Unknown");
+            printf("  GUID: %s\n", guid ? guid : "NULL");
+            printf("  IsGamepad: %d\n", is_gamepad);
+            printf("\n");
+        }
+
+    
     if(glfwJoystickPresent(js) && glfwJoystickIsGamepad(js))
     {
       const char *name = glfwGetJoystickName(js);
