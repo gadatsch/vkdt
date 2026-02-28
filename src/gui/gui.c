@@ -302,7 +302,7 @@ int dt_gui_init()
         }
 
     
-    if(glfwJoystickPresent(js) && glfwJoystickIsGamepad(js))
+    if(glfwJoystickPresent(js))
     {
       const char *name = glfwGetJoystickName(js);
       dt_log(s_log_gui, "found gamepad %s", name);
