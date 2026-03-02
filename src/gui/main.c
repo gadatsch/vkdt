@@ -28,15 +28,63 @@
 
 dt_gui_t vkdt = {0};
 
+#include <stdio.h>
+#include <math.h>
+
 static inline int
 gamepad_changed(
     GLFWgamepadstate *last,
     GLFWgamepadstate *curr)
 {
+  static int printed_sizes = 0;
+
+  // Print sizeof info once
+  if(!printed_sizes)
+  {
+    printf("sizeof(curr->buttons) = %zu\n",
+           sizeof(curr->buttons));
+    printf("sizeof(curr->buttons[0]) = %zu\n",
+           sizeof(curr->buttons[0]));
+    printf("button count (calc) = %zu\n",
+           sizeof(curr->buttons)/sizeof(curr->buttons[0]));
+
+    printf("sizeof(curr->axes) = %zu\n",
+           sizeof(curr->axes));
+    printf("sizeof(curr->axes[0]) = %zu\n",
+           sizeof(curr->axes[0]));
+    printf("axis count (calc) = %zu\n",
+           sizeof(curr->axes)/sizeof(curr->axes[0]));
+
+    printf("GLFW_GAMEPAD_AXIS_LEFT_X      = %d\n", GLFW_GAMEPAD_AXIS_LEFT_X);
+    printf("GLFW_GAMEPAD_AXIS_LEFT_Y      = %d\n", GLFW_GAMEPAD_AXIS_LEFT_Y);
+    printf("GLFW_GAMEPAD_AXIS_RIGHT_X     = %d\n", GLFW_GAMEPAD_AXIS_RIGHT_X);
+    printf("GLFW_GAMEPAD_AXIS_RIGHT_Y     = %d\n", GLFW_GAMEPAD_AXIS_RIGHT_Y);
+    printf("GLFW_GAMEPAD_AXIS_LEFT_TRIGGER  = %d\n", GLFW_GAMEPAD_AXIS_LEFT_TRIGGER);
+    printf("GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER = %d\n", GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER);
+    printf("GLFW_GAMEPAD_AXIS_LAST        = %d\n", GLFW_GAMEPAD_AXIS_LAST);
+
+    printed_sizes = 1;
+  }
+
+  float deadzone = 0.05f;
   int changed = 0;
 
-  // check buttons
-  for(int i = 0; i < 15; i++)
+  // Only print axes beyond deadzone
+  for(int i = 0; i <= GLFW_GAMEPAD_AXIS_LAST; i++)
+  {
+    float v = curr->axes[i];
+
+    if(fabsf(v) > deadzone)
+    {
+      printf("axis %d beyond deadzone: %f\n", i, v);
+      changed = 1;
+    }
+  }
+
+  // Button change detection (unchanged)
+  for(int i = 0;
+      i < (int)(sizeof(curr->buttons)/sizeof(curr->buttons[0]));
+      i++)
   {
     if(curr->buttons[i] != last->buttons[i])
     {
@@ -45,22 +93,6 @@ gamepad_changed(
       changed = 1;
     }
   }
-
-  // print all axes
-  printf("axes:\n");
-  for(int i = 0; i < 6; i++)
-  {
-    printf("  axis %d = %f\n", i, curr->axes[i]);
-  }
-
-  float deadzone = 0.05f;
-
-  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_X])  > deadzone)  changed = 1;
-  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_Y])  > deadzone)  changed = 1;
-  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_X]) > deadzone)  changed = 1;
-  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]) > deadzone)  changed = 1;
-  if(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER]   > deadzone)  changed = 1;
-  if(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER]  > deadzone)  changed = 1;
 
   return changed;
 }
