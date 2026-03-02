@@ -33,18 +33,36 @@ gamepad_changed(
     GLFWgamepadstate *last,
     GLFWgamepadstate *curr)
 {
-  for(int i=0;i<sizeof(curr->buttons)/sizeof(curr->buttons[0]);i++)
+  int changed = 0;
+
+  // check buttons
+  for(int i = 0; i < 15; i++)
+  {
     if(curr->buttons[i] != last->buttons[i])
-      return 1;
-  // if curr axes are not in neutral state, give or take dead zone
-  float deadzone = 0.05;
-  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_X])  > deadzone) return 1;
-  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_Y])  > deadzone) return 1;
-  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_X]) > deadzone) return 1;
-  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]) > deadzone) return 1;
-  if(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER]   > deadzone) return 1;
-  if(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER]  > deadzone) return 1;
-  return 0;
+    {
+      printf("button %d changed: %d -> %d\n",
+             i, last->buttons[i], curr->buttons[i]);
+      changed = 1;
+    }
+  }
+
+  // print all axes
+  printf("axes:\n");
+  for(int i = 0; i < 6; i++)
+  {
+    printf("  axis %d = %f\n", i, curr->axes[i]);
+  }
+
+  float deadzone = 0.05f;
+
+  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_X])  > deadzone)  changed = 1;
+  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_Y])  > deadzone)  changed = 1;
+  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_X]) > deadzone)  changed = 1;
+  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]) > deadzone)  changed = 1;
+  if(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER]   > deadzone)  changed = 1;
+  if(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER]  > deadzone)  changed = 1;
+
+  return changed;
 }
 
 // since in glfw, joysticks can only be polled and have no event interface
