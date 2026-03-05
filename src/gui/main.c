@@ -36,65 +36,18 @@ gamepad_changed(
     GLFWgamepadstate *last,
     GLFWgamepadstate *curr)
 {
-  static int printed_sizes = 0;
-
-  // Print sizeof info once
-  if(!printed_sizes)
-  {
-    printf("sizeof(curr->buttons) = %zu\n",
-           sizeof(curr->buttons));
-    printf("sizeof(curr->buttons[0]) = %zu\n",
-           sizeof(curr->buttons[0]));
-    printf("button count (calc) = %zu\n",
-           sizeof(curr->buttons)/sizeof(curr->buttons[0]));
-
-    printf("sizeof(curr->axes) = %zu\n",
-           sizeof(curr->axes));
-    printf("sizeof(curr->axes[0]) = %zu\n",
-           sizeof(curr->axes[0]));
-    printf("axis count (calc) = %zu\n",
-           sizeof(curr->axes)/sizeof(curr->axes[0]));
-
-    printf("GLFW_GAMEPAD_AXIS_LEFT_X      = %d\n", GLFW_GAMEPAD_AXIS_LEFT_X);
-    printf("GLFW_GAMEPAD_AXIS_LEFT_Y      = %d\n", GLFW_GAMEPAD_AXIS_LEFT_Y);
-    printf("GLFW_GAMEPAD_AXIS_RIGHT_X     = %d\n", GLFW_GAMEPAD_AXIS_RIGHT_X);
-    printf("GLFW_GAMEPAD_AXIS_RIGHT_Y     = %d\n", GLFW_GAMEPAD_AXIS_RIGHT_Y);
-    printf("GLFW_GAMEPAD_AXIS_LEFT_TRIGGER  = %d\n", GLFW_GAMEPAD_AXIS_LEFT_TRIGGER);
-    printf("GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER = %d\n", GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER);
-    printf("GLFW_GAMEPAD_AXIS_LAST        = %d\n", GLFW_GAMEPAD_AXIS_LAST);
-
-    printed_sizes = 1;
-  }
-
-  float deadzone = 0.05f;
-  int changed = 0;
-
-  // Only print axes beyond deadzone
-  for(int i = 0; i <= GLFW_GAMEPAD_AXIS_LAST; i++)
-  {
-    float v = curr->axes[i];
-
-    if(fabsf(v) > deadzone)
-    {
-      printf("axis %d beyond deadzone: %f\n", i, v);
-      changed = 1;
-    }
-  }
-
-  // Button change detection (unchanged)
-  for(int i = 0;
-      i < (int)(sizeof(curr->buttons)/sizeof(curr->buttons[0]));
-      i++)
-  {
+  for(int i=0;i<sizeof(curr->buttons)/sizeof(curr->buttons[0]);i++)
     if(curr->buttons[i] != last->buttons[i])
-    {
-      printf("button %d changed: %d -> %d\n",
-             i, last->buttons[i], curr->buttons[i]);
-      changed = 1;
-    }
-  }
-
-  return changed;
+      return 1;
+  // if curr axes are not in neutral state, give or take dead zone
+  float deadzone = 0.05;
+  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_X])  > deadzone) return 1;
+  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_Y])  > deadzone) return 1;
+  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_X]) > deadzone) return 1;
+  if(fabsf(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_Y]) > deadzone) return 1;
+  if(curr->axes[GLFW_GAMEPAD_AXIS_LEFT_TRIGGER]   > deadzone) return 1;
+  if(curr->axes[GLFW_GAMEPAD_AXIS_RIGHT_TRIGGER]  > deadzone) return 1;
+  return 0;
 }
 
 static void
